@@ -183,6 +183,10 @@ local openStroke = Instance.new("UIStroke", openButton)
 openStroke.Color = Color3.fromRGB(0, 255, 255)
 openStroke.Thickness = 2
 
+openButton.MouseButton1Click:Connect(function()
+	openUI()
+end)
+
 local sidebar = Instance.new("Frame")
 sidebar.Name = "Sidebar"
 sidebar.Size = UDim2.new(0, 150, 1, -40)
@@ -226,6 +230,42 @@ settingsTabButton.Parent = sidebar
 
 local settingsTabCorner = Instance.new("UICorner", settingsTabButton)
 settingsTabCorner.CornerRadius = UDim.new(0, 8)
+
+espTabButton.MouseButton1Click:Connect(function()
+	espPage.Visible = true
+	settingsPage.Visible = false
+	
+	espTabButton.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+	espTabButton.BackgroundTransparency = 0.7
+	espTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	
+	settingsTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	settingsTabButton.BackgroundTransparency = 0.5
+	settingsTabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+	
+	colorPickerOpen = false
+	colorPickerFrame.Visible = false
+	languageDropdownOpen = false
+	languageDropdown.Visible = false
+end)
+
+settingsTabButton.MouseButton1Click:Connect(function()
+	espPage.Visible = false
+	settingsPage.Visible = true
+	
+	settingsTabButton.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+	settingsTabButton.BackgroundTransparency = 0.7
+	settingsTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	
+	espTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	espTabButton.BackgroundTransparency = 0.5
+	espTabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+	
+	colorPickerOpen = false
+	colorPickerFrame.Visible = false
+	languageDropdownOpen = false
+	languageDropdown.Visible = false
+end)
 
 local contentFrame = Instance.new("Frame")
 contentFrame.Name = "ContentFrame"
@@ -272,28 +312,66 @@ settingsListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 local colorPickerFrame = Instance.new("Frame")
 colorPickerFrame.Name = "ColorPickerFrame"
-colorPickerFrame.Size = UDim2.new(0, 200, 0, 100)
+colorPickerFrame.Size = UDim2.new(0, 220, 0, 120)
+colorPickerFrame.Position = UDim2.new(0.5, -110, 0.5, -60)
 colorPickerFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 colorPickerFrame.BackgroundTransparency = 0.1
 colorPickerFrame.BorderSizePixel = 0
 colorPickerFrame.Visible = false
-colorPickerFrame.ZIndex = 10
+colorPickerFrame.ZIndex = 20
+colorPickerFrame.Active = true
+colorPickerFrame.Draggable = true
+colorPickerFrame.Parent = screenGui
 
 local colorPickerCorner = Instance.new("UICorner", colorPickerFrame)
-colorPickerCorner.CornerRadius = UDim.new(0, 8)
+colorPickerCorner.CornerRadius = UDim.new(0, 12)
 
 local colorPickerStroke = Instance.new("UIStroke", colorPickerFrame)
 colorPickerStroke.Color = Color3.fromRGB(0, 255, 255)
-colorPickerStroke.Thickness = 1
-colorPickerStroke.Transparency = 0.5
+colorPickerStroke.Thickness = 2
+colorPickerStroke.Transparency = 0.3
+
+local colorPickerTitle = Instance.new("TextLabel")
+colorPickerTitle.Size = UDim2.new(1, -40, 0, 30)
+colorPickerTitle.Position = UDim2.new(0, 20, 0, 5)
+colorPickerTitle.BackgroundTransparency = 1
+colorPickerTitle.Text = "Selecionar Cor"
+colorPickerTitle.TextColor3 = Color3.fromRGB(0, 255, 255)
+colorPickerTitle.TextSize = 16
+colorPickerTitle.Font = Enum.Font.GothamBold
+colorPickerTitle.TextXAlignment = Enum.TextXAlignment.Left
+colorPickerTitle.ZIndex = 21
+colorPickerTitle.Parent = colorPickerFrame
+
+local colorPickerClose = Instance.new("TextButton")
+colorPickerClose.Size = UDim2.new(0, 25, 0, 25)
+colorPickerClose.Position = UDim2.new(1, -30, 0, 5)
+colorPickerClose.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+colorPickerClose.BackgroundTransparency = 0.2
+colorPickerClose.BorderSizePixel = 0
+colorPickerClose.Text = "✕"
+colorPickerClose.TextColor3 = Color3.fromRGB(255, 255, 255)
+colorPickerClose.TextSize = 14
+colorPickerClose.Font = Enum.Font.GothamBold
+colorPickerClose.ZIndex = 21
+colorPickerClose.Parent = colorPickerFrame
+
+local colorPickerCloseCorner = Instance.new("UICorner", colorPickerClose)
+colorPickerCloseCorner.CornerRadius = UDim.new(0, 6)
+
+colorPickerClose.MouseButton1Click:Connect(function()
+	colorPickerFrame.Visible = false
+	colorPickerOpen = false
+end)
 
 local colorGrid = Instance.new("UIGridLayout")
 colorGrid.Parent = colorPickerFrame
-colorGrid.CellSize = UDim2.new(0, 35, 0, 35)
-colorGrid.CellPadding = UDim2.new(0, 5, 0, 5)
+colorGrid.CellSize = UDim2.new(0, 40, 0, 40)
+colorGrid.CellPadding = UDim2.new(0, 8, 0, 8)
 colorGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
 colorGrid.VerticalAlignment = Enum.VerticalAlignment.Center
 colorGrid.SortOrder = Enum.SortOrder.LayoutOrder
+colorGrid.Parent = colorPickerFrame
 
 local predefinedColors = {
 	Color3.fromRGB(255, 255, 255),
@@ -303,56 +381,130 @@ local predefinedColors = {
 	Color3.fromRGB(255, 255, 0),
 	Color3.fromRGB(255, 0, 255),
 	Color3.fromRGB(0, 255, 255),
-	Color3.fromRGB(255, 100, 0)
+	Color3.fromRGB(255, 100, 0),
+	Color3.fromRGB(128, 0, 255),
+	Color3.fromRGB(0, 255, 128),
+	Color3.fromRGB(255, 128, 0),
+	Color3.fromRGB(255, 0, 128),
+	Color3.fromRGB(128, 255, 0),
+	Color3.fromRGB(0, 128, 255),
+	Color3.fromRGB(255, 255, 128),
+	Color3.fromRGB(128, 128, 255)
 }
 
-for _, col in ipairs(predefinedColors) do
+local colorButtons = {}
+
+for i, col in ipairs(predefinedColors) do
 	local colorBtn = Instance.new("TextButton")
-	colorBtn.Size = UDim2.new(0, 35, 0, 35)
+	colorBtn.Size = UDim2.new(0, 40, 0, 40)
 	colorBtn.BackgroundColor3 = col
 	colorBtn.BorderSizePixel = 0
 	colorBtn.Text = ""
-	colorBtn.ZIndex = 11
+	colorBtn.ZIndex = 21
 	colorBtn.Parent = colorPickerFrame
 	
 	local colorBtnCorner = Instance.new("UICorner", colorBtn)
-	colorBtnCorner.CornerRadius = UDim.new(0, 6)
+	colorBtnCorner.CornerRadius = UDim.new(0, 8)
 	
 	local colorBtnStroke = Instance.new("UIStroke", colorBtn)
 	colorBtnStroke.Color = Color3.fromRGB(255, 255, 255)
-	colorBtnStroke.Thickness = 1
-	colorBtnStroke.Transparency = 0.8
+	colorBtnStroke.Thickness = 2
+	colorBtnStroke.Transparency = 0.5
+	colorBtnStroke.ZIndex = 22
+	
+	colorBtn.MouseEnter:Connect(function()
+		colorBtnStroke.Transparency = 0
+		colorBtnStroke.Color = Color3.fromRGB(0, 255, 255)
+	end)
+	
+	colorBtn.MouseLeave:Connect(function()
+		colorBtnStroke.Transparency = 0.5
+		colorBtnStroke.Color = Color3.fromRGB(255, 255, 255)
+	end)
 	
 	colorBtn.MouseButton1Click:Connect(function()
 		customColor = col
 		colorSelectButton.BackgroundColor3 = col
-		colorPickerOpen = false
 		colorPickerFrame.Visible = false
+		colorPickerOpen = false
+		
+		for _, btn in pairs(colorButtons) do
+			btn.Stroke.Transparency = 0.5
+			btn.Stroke.Color = Color3.fromRGB(255, 255, 255)
+		end
+		colorBtnStroke.Transparency = 0
+		colorBtnStroke.Color = Color3.fromRGB(0, 255, 255)
 	end)
+	
+	colorButtons[colorBtn] = colorBtnStroke
 end
 
-colorPickerFrame.Parent = mainFrame
+coroutine.wrap(function()
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, 40)
+	padding.Parent = colorPickerFrame
+	
+	colorGrid.Visible = false
+	colorGrid.Visible = true
+end)()
 
 local languageDropdown = Instance.new("Frame")
 languageDropdown.Name = "LanguageDropdown"
-languageDropdown.Size = UDim2.new(0, 150, 0, 0)
+languageDropdown.Size = UDim2.new(0, 200, 0, 0)
+languageDropdown.Position = UDim2.new(0.5, -100, 0.5, -80)
 languageDropdown.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 languageDropdown.BackgroundTransparency = 0.1
 languageDropdown.BorderSizePixel = 0
 languageDropdown.Visible = false
-languageDropdown.ZIndex = 15
+languageDropdown.ZIndex = 20
+languageDropdown.Active = true
+languageDropdown.Draggable = true
+languageDropdown.Parent = screenGui
 
 local languageDropdownCorner = Instance.new("UICorner", languageDropdown)
-languageDropdownCorner.CornerRadius = UDim.new(0, 8)
+languageDropdownCorner.CornerRadius = UDim.new(0, 12)
 
 local languageDropdownStroke = Instance.new("UIStroke", languageDropdown)
 languageDropdownStroke.Color = Color3.fromRGB(0, 255, 255)
-languageDropdownStroke.Thickness = 1
-languageDropdownStroke.Transparency = 0.5
+languageDropdownStroke.Thickness = 2
+languageDropdownStroke.Transparency = 0.3
+
+local languageDropdownTitle = Instance.new("TextLabel")
+languageDropdownTitle.Size = UDim2.new(1, -40, 0, 30)
+languageDropdownTitle.Position = UDim2.new(0, 20, 0, 5)
+languageDropdownTitle.BackgroundTransparency = 1
+languageDropdownTitle.Text = "Selecionar Idioma"
+languageDropdownTitle.TextColor3 = Color3.fromRGB(0, 255, 255)
+languageDropdownTitle.TextSize = 16
+languageDropdownTitle.Font = Enum.Font.GothamBold
+languageDropdownTitle.TextXAlignment = Enum.TextXAlignment.Left
+languageDropdownTitle.ZIndex = 21
+languageDropdownTitle.Parent = languageDropdown
+
+local languageDropdownClose = Instance.new("TextButton")
+languageDropdownClose.Size = UDim2.new(0, 25, 0, 25)
+languageDropdownClose.Position = UDim2.new(1, -30, 0, 5)
+languageDropdownClose.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+languageDropdownClose.BackgroundTransparency = 0.2
+languageDropdownClose.BorderSizePixel = 0
+languageDropdownClose.Text = "✕"
+languageDropdownClose.TextColor3 = Color3.fromRGB(255, 255, 255)
+languageDropdownClose.TextSize = 14
+languageDropdownClose.Font = Enum.Font.GothamBold
+languageDropdownClose.ZIndex = 21
+languageDropdownClose.Parent = languageDropdown
+
+local languageDropdownCloseCorner = Instance.new("UICorner", languageDropdownClose)
+languageDropdownCloseCorner.CornerRadius = UDim.new(0, 6)
+
+languageDropdownClose.MouseButton1Click:Connect(function()
+	languageDropdown.Visible = false
+	languageDropdownOpen = false
+end)
 
 local languageListLayout = Instance.new("UIListLayout")
 languageListLayout.Parent = languageDropdown
-languageListLayout.Padding = UDim.new(0, 2)
+languageListLayout.Padding = UDim.new(0, 5)
 languageListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 languageListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
@@ -360,7 +512,7 @@ local languages = {"English", "Portuguese", "Russian", "French"}
 
 for _, lang in ipairs(languages) do
 	local langBtn = Instance.new("TextButton")
-	langBtn.Size = UDim2.new(1, -10, 0, 35)
+	langBtn.Size = UDim2.new(1, -20, 0, 40)
 	langBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 	langBtn.BackgroundTransparency = 0.3
 	langBtn.BorderSizePixel = 0
@@ -368,11 +520,26 @@ for _, lang in ipairs(languages) do
 	langBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	langBtn.TextSize = 14
 	langBtn.Font = Enum.Font.Gotham
-	langBtn.ZIndex = 16
+	langBtn.ZIndex = 21
 	langBtn.Parent = languageDropdown
 	
 	local langBtnCorner = Instance.new("UICorner", langBtn)
-	langBtnCorner.CornerRadius = UDim.new(0, 6)
+	langBtnCorner.CornerRadius = UDim.new(0, 8)
+	
+	local langBtnStroke = Instance.new("UIStroke", langBtn)
+	langBtnStroke.Color = Color3.fromRGB(0, 255, 255)
+	langBtnStroke.Thickness = 1
+	langBtnStroke.Transparency = 0.7
+	
+	langBtn.MouseEnter:Connect(function()
+		langBtnStroke.Transparency = 0
+		langBtn.BackgroundTransparency = 0.5
+	end)
+	
+	langBtn.MouseLeave:Connect(function()
+		langBtnStroke.Transparency = 0.7
+		langBtn.BackgroundTransparency = 0.3
+	end)
 	
 	langBtn.MouseButton1Click:Connect(function()
 		currentLanguage = lang
@@ -384,7 +551,14 @@ for _, lang in ipairs(languages) do
 	end)
 end
 
-languageDropdown.Parent = mainFrame
+coroutine.wrap(function()
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, 40)
+	padding.Parent = languageDropdown
+	
+	languageListLayout.Visible = false
+	languageListLayout.Visible = true
+end)()
 
 local function createToggle(name, defaultState, parent)
 	local frame = Instance.new("Frame")
@@ -530,9 +704,7 @@ colorSelectButton.MouseButton1Click:Connect(function()
 		languageDropdownOpen = false
 		languageDropdown.Visible = false
 		
-		local absolutePos = colorSelectButton.AbsolutePosition
-		local absoluteSize = colorSelectButton.AbsoluteSize
-		colorPickerFrame.Position = UDim2.new(0, absolutePos.X - 80, 0, absolutePos.Y + absoluteSize.Y + 5)
+		colorPickerFrame.Position = UDim2.new(0.5, -110, 0.5, -60)
 	end
 end)
 
@@ -591,10 +763,8 @@ languageSelectButton.MouseButton1Click:Connect(function()
 		colorPickerOpen = false
 		colorPickerFrame.Visible = false
 		
-		local absPos = languageSelectButton.AbsolutePosition
-		local absSize = languageSelectButton.AbsoluteSize
-		languageDropdown.Size = UDim2.new(0, absSize.X, 0, #languages * 37 + 10)
-		languageDropdown.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 2)
+		languageDropdown.Size = UDim2.new(0, 200, 0, #languages * 45 + 50)
+		languageDropdown.Position = UDim2.new(0.5, -100, 0.5, -80)
 	end
 end)
 
@@ -615,7 +785,7 @@ function updateAllTexts()
 	languageSelectButton.Text = t.LanguageSelected
 	
 	for _, btn in ipairs(languageDropdown:GetChildren()) do
-		if btn:IsA("TextButton") then
+		if btn:IsA("TextButton") and btn.Name ~= "CloseButton" then
 			local btnText = btn.Text
 			for langKey, langData in pairs(Translations) do
 				if langData.LanguageSelected == btnText then
@@ -655,38 +825,6 @@ function openUI()
 end
 
 closeButton.MouseButton1Click:Connect(closeUI)
-openButton.MouseButton1Click:Connect(openUI)
-
-espTabButton.MouseButton1Click:Connect(function()
-	espPage.Visible = true
-	settingsPage.Visible = false
-	
-	espTabButton.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
-	espTabButton.BackgroundTransparency = 0.7
-	espTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	
-	settingsTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	settingsTabButton.BackgroundTransparency = 0.5
-	settingsTabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
-end)
-
-settingsTabButton.MouseButton1Click:Connect(function()
-	espPage.Visible = false
-	settingsPage.Visible = true
-	
-	settingsTabButton.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
-	settingsTabButton.BackgroundTransparency = 0.7
-	settingsTabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-	
-	espTabButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	espTabButton.BackgroundTransparency = 0.5
-	espTabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
-	
-	colorPickerFrame.Visible = false
-	colorPickerOpen = false
-	languageDropdown.Visible = false
-	languageDropdownOpen = false
-end)
 
 local playerESP = {}
 
@@ -839,7 +977,10 @@ local function setupPlayerESP(player)
 	
 	local function onCharacterAdded(character)
 		highlight.Parent = character
-		billboard.Parent = character:WaitForChild("Head")
+		local head = character:WaitForChild("Head")
+		if head then
+			billboard.Parent = head
+		end
 	end
 	
 	if player.Character then
