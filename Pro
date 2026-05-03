@@ -1,743 +1,750 @@
 --[[
-    MigueleMaxwell Esp Pro
-    by miguelemaxwell
-    v1.0.0
---]]
+    MigueleMaxwell Esp Pro - Neon UI + ESP System
+    Versão: 1.0.0 | Luau | Roblox LocalScript
+    Arquitetura: Modular, Debug-Ready, Performance-Optimized
+]]
 
+-- ══════════════════════════════════════════════
+-- 🔧 SERVICES
+-- ══════════════════════════════════════════════
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
-local LP = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer
 
+-- ══════════════════════════════════════════════
+-- 🐞 DEBUG SYSTEM
+-- ══════════════════════════════════════════════
+local DEBUG = true
+
+local function dbg(msg)
+	if DEBUG then
+		print("[ESP DEBUG]: " .. tostring(msg))
+	end
+end
+
+-- ══════════════════════════════════════════════
+-- 📚 DATA
+-- ══════════════════════════════════════════════
+-- Language Table
 local Lang = {
-    EN = {
-        ESP = "ESP",
-        CFG = "CFG",
-        MASTER = "ESP",
-        HL = "HL",
-        NM = "NM",
-        DST = "DST",
-        HP = "HP",
-        TMF = "TMF",
-        RBW = "RBW",
-        CLR = "CLR",
-        FILL = "FILL",
-        COLOR_PICKER = "Color Picker",
-        LANGUAGE = "Language"
-    },
-    PT = {
-        ESP = "ESP",
-        CFG = "CFG",
-        MASTER = "ESP",
-        HL = "HL",
-        NM = "NM",
-        DST = "DST",
-        HP = "HP",
-        TMF = "TMF",
-        RBW = "RBW",
-        CLR = "CLR",
-        FILL = "FILL",
-        COLOR_PICKER = "Seletor de Cor",
-        LANGUAGE = "Idioma"
-    },
-    RU = {
-        ESP = "ESP",
-        CFG = "CFG",
-        MASTER = "ESP",
-        HL = "HL",
-        NM = "ИМ",
-        DST = "ДСТ",
-        HP = "ХП",
-        TMF = "ТМФ",
-        RBW = "РБВ",
-        CLR = "ЦВТ",
-        FILL = "ЗАЛ",
-        COLOR_PICKER = "Выбор Цвета",
-        LANGUAGE = "Язык"
-    },
-    FR = {
-        ESP = "ESP",
-        CFG = "CFG",
-        MASTER = "ESP",
-        HL = "HL",
-        NM = "NM",
-        DST = "DST",
-        HP = "PV",
-        TMF = "TMF",
-        RBW = "ARC",
-        CLR = "CLR",
-        FILL = "REMP",
-        COLOR_PICKER = "Sélecteur de Couleur",
-        LANGUAGE = "Langue"
-    },
-    ABR = {
-        ESP = "ESP",
-        CFG = "CFG",
-        MASTER = "ESP",
-        HL = "HL",
-        NM = "NM",
-        DST = "DST",
-        HP = "HP",
-        TMF = "TMF",
-        RBW = "RBW",
-        CLR = "CLR",
-        FILL = "FILL",
-        COLOR_PICKER = "Color Picker",
-        LANGUAGE = "Language"
-    }
+	ESP = {EN="ESP", PT="ESP", RU="ESP", FR="ESP", ABBR="E"},
+	CFG = {EN="CFG", PT="CFG", RU="CFG", FR="CFG", ABBR="C"},
+	Name = {EN="Name", PT="Nome", RU="Имя", FR="Nom", ABBR="N"},
+	Distance = {EN="Distance", PT="Distância", RU="Расст", FR="Dist", ABBR="D"},
+	Health = {EN="Health", PT="Vida", RU="Здоровье", FR="Vie", ABBR="H"},
+	TeamFilter = {EN="Team Filter", PT="Filtro Time", RU="Фильтр", FR="Filtre", ABBR="TF"},
+	Rainbow = {EN="Rainbow", PT="Arco-íris", RU="Радуга", FR="Arc-en-ciel", ABBR="RBW"},
+	Fill = {EN="Fill", PT="Preencher", RU="Заливка", FR="Remplir", ABBR="FL"},
+	ColorPicker = {EN="Color", PT="Cor", RU="Цвет", FR="Couleur", ABBR="C"},
+	Highlight = {EN="Highlight", PT="Destaque", RU="Подсв", FR="Surlign", ABBR="HL"},
+	System = {EN="ESP System", PT="Sistema ESP", RU="ESP Система", FR="Système ESP", ABBR="ESP"},
+	Language = {EN="Language", PT="Idioma", RU="Язык", FR="Langue", ABBR="LNG"}
 }
 
-local CurrentLang = "EN"
+-- Color Picker Colors
+local ColorList = {
+	Color3.fromRGB(255, 255, 255), -- White
+	Color3.fromRGB(255, 0, 0),     -- Red
+	Color3.fromRGB(0, 255, 0),     -- Green
+	Color3.fromRGB(0, 0, 255),     -- Blue
+	Color3.fromRGB(255, 255, 0),   -- Yellow
+	Color3.fromRGB(255, 0, 255),   -- Magenta
+	Color3.fromRGB(0, 255, 255),   -- Cyan
+	Color3.fromRGB(255, 128, 0),   -- Orange
+}
 
+-- ══════════════════════════════════════════════
+-- ⚙️ SETTINGS (State)
+-- ══════════════════════════════════════════════
 local Settings = {
-    ESP = true,
-    HL = true,
-    NM = true,
-    DST = true,
-    HP = true,
-    TMF = false,
-    RBW = false,
-    CLR = Color3.fromRGB(0, 255, 255),
-    FILL = false
+	ESP_HL = true,      -- Highlight
+	ESP_NM = true,      -- Name
+	ESP_DST = true,     -- Distance
+	ESP_HP = true,      -- Health
+	ESP_TM = false,     -- Team Filter
+	ESP_RBW = false,    -- Rainbow
+	ESP_CLR = false,    -- Color Picker
+	ESP_FIL = true,     -- Fill
+	ESP_CLR_VAL = Color3.fromRGB(255, 255, 255), -- Selected Color
+	LANG = "EN",        -- Language
+	UI_OPEN = true,
 }
 
-local ESP_Cache = {}
-local GUI = {}
-local Tabs = {}
+local espObjects = {} -- {[player] = {hl, bg}}
+local activeConnections = {}
 
-local function GetText(key)
-    return Lang[CurrentLang][key]
+-- ══════════════════════════════════════════════
+-- 🎨 UI CREATION
+-- ══════════════════════════════════════════════
+local function createUI()
+	local ScreenGui = Instance.new("ScreenGui")
+	ScreenGui.Name = "MigueleMaxwellEspPro"
+	ScreenGui.ResetOnSpawn = false
+	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	ScreenGui.Parent = CoreGui
+
+	-- MainFrame
+	local MainFrame = Instance.new("Frame")
+	MainFrame.Name = "MainFrame"
+	MainFrame.Size = UDim2.new(0, 580, 0, 420)
+	MainFrame.Position = UDim2.new(0.5, -290, 0.5, -210)
+	MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+	MainFrame.BorderSizePixel = 0
+	MainFrame.Active = true
+	MainFrame.Draggable = false
+
+	-- Corner
+	local UICorner = Instance.new("UICorner")
+	UICorner.CornerRadius = UDim.new(0, 8)
+	UICorner.Parent = MainFrame
+
+	-- Stroke Neon
+	local UIStroke = Instance.new("UIStroke")
+	UIStroke.Color = Color3.fromRGB(0, 255, 255)
+	UIStroke.Thickness = 2
+	UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	UIStroke.Parent = MainFrame
+
+	-- Gradient
+	local UIGradient = Instance.new("UIGradient")
+	UIGradient.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(128, 0, 255)),
+	})
+	UIGradient.Rotation = 45
+	UIGradient.Parent = UIStroke
+
+	-- TopBar
+	local TopBar = Instance.new("Frame")
+	TopBar.Name = "TopBar"
+	TopBar.Size = UDim2.new(1, 0, 0, 40)
+	TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+	TopBar.BorderSizePixel = 0
+	TopBar.Parent = MainFrame
+
+	local UICorner_Top = Instance.new("UICorner")
+	UICorner_Top.CornerRadius = UDim.new(0, 8)
+	UICorner_Top.Parent = TopBar
+
+	local TopCover = Instance.new("Frame")
+	TopCover.Size = UDim2.new(1, 0, 0, 20)
+	TopCover.Position = UDim2.new(0, 0, 0.5, 0)
+	TopCover.BackgroundColor3 = TopBar.BackgroundColor3
+	TopCover.BorderSizePixel = 0
+	TopCover.Parent = TopBar
+
+	-- Title
+	local Title = Instance.new("TextLabel")
+	Title.Name = "Title"
+	Title.Size = UDim2.new(0, 200, 1, 0)
+	Title.Position = UDim2.new(0, 15, 0, 0)
+	Title.BackgroundTransparency = 1
+	Title.Text = "MigueleMaxwell Esp Pro"
+	Title.TextColor3 = Color3.fromRGB(0, 255, 255)
+	Title.TextSize = 18
+	Title.Font = Enum.Font.GothamBold
+	Title.TextXAlignment = Enum.TextXAlignment.Left
+	Title.Parent = TopBar
+
+	local TitleGradient = Instance.new("UIGradient")
+	TitleGradient.Color = UIGradient.Color
+	TitleGradient.Rotation = 45
+	TitleGradient.Parent = Title
+
+	-- BtnToggleUI
+	local BtnToggle = Instance.new("TextButton")
+	BtnToggle.Name = "BtnToggle"
+	BtnToggle.Size = UDim2.new(0, 30, 0, 30)
+	BtnToggle.Position = UDim2.new(1, -40, 0, 5)
+	BtnToggle.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+	BtnToggle.Text = "✕"
+	BtnToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+	BtnToggle.TextSize = 16
+	BtnToggle.Font = Enum.Font.GothamBold
+	BtnToggle.BorderSizePixel = 0
+	BtnToggle.Parent = TopBar
+
+	local BtnCorner = Instance.new("UICorner")
+	BtnCorner.CornerRadius = UDim.new(0, 4)
+	BtnCorner.Parent = BtnToggle
+
+	-- Sidebar
+	local Sidebar = Instance.new("Frame")
+	Sidebar.Name = "Sidebar"
+	Sidebar.Size = UDim2.new(0, 150, 1, -40)
+	Sidebar.Position = UDim2.new(0, 0, 0, 40)
+	Sidebar.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+	Sidebar.BorderSizePixel = 0
+	Sidebar.Parent = MainFrame
+
+	local SidebarCorner = Instance.new("UICorner")
+	SidebarCorner.CornerRadius = UDim.new(0, 8)
+	SidebarCorner.Parent = Sidebar
+
+	local SidebarCover = Instance.new("Frame")
+	SidebarCover.Size = UDim2.new(0, 5, 1, 0)
+	SidebarCover.Position = UDim2.new(1, -5, 0, 0)
+	SidebarCover.BackgroundColor3 = Sidebar.BackgroundColor3
+	SidebarCover.BorderSizePixel = 0
+	SidebarCover.Parent = Sidebar
+
+	-- ContentFrame
+	local ContentFrame = Instance.new("Frame")
+	ContentFrame.Name = "ContentFrame"
+	ContentFrame.Size = UDim2.new(1, -150, 1, -40)
+	ContentFrame.Position = UDim2.new(0, 150, 0, 40)
+	ContentFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+	ContentFrame.BorderSizePixel = 0
+	ContentFrame.Parent = MainFrame
+
+	local ContentCorner = Instance.new("UICorner")
+	ContentCorner.CornerRadius = UDim.new(0, 8)
+	ContentCorner.Parent = ContentFrame
+
+	local ContentCover = Instance.new("Frame")
+	ContentCover.Size = UDim2.new(0, 5, 1, 0)
+	ContentCover.Position = UDim2.new(-5, 0, 0, 0)
+	ContentCover.BackgroundColor3 = ContentFrame.BackgroundColor3
+	ContentCover.BorderSizePixel = 0
+	ContentCover.Parent = ContentFrame
+
+	-- Tabs
+	local Tabs = {}
+	local tabNames = {"ESP", "CFG"}
+
+	for i, tabName in ipairs(tabNames) do
+		local TabBtn = Instance.new("TextButton")
+		TabBtn.Name = "Tab_" .. tabName
+		TabBtn.Size = UDim2.new(1, -20, 0, 35)
+		TabBtn.Position = UDim2.new(0, 10, 0, 10 + (i-1) * 45)
+		TabBtn.BackgroundColor3 = (i == 1) and Color3.fromRGB(0, 255, 255, 0.3) or Color3.fromRGB(60, 60, 70)
+		TabBtn.Text = Lang[tabName][Settings.LANG]
+		TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TabBtn.TextSize = 14
+		TabBtn.Font = Enum.Font.GothamSemibold
+		TabBtn.BorderSizePixel = 0
+		TabBtn.Parent = Sidebar
+
+		local TabCorner = Instance.new("UICorner")
+		TabCorner.CornerRadius = UDim.new(0, 4)
+		TabCorner.Parent = TabBtn
+
+		local TabStroke = Instance.new("UIStroke")
+		TabStroke.Color = Color3.fromRGB(0, 255, 255)
+		TabStroke.Thickness = 1
+		TabStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		TabStroke.Parent = TabBtn
+
+		Tabs[tabName] = TabBtn
+
+		-- Content Page
+		local Page = Instance.new("ScrollingFrame")
+		Page.Name = "Page_" .. tabName
+		Page.Size = UDim2.new(1, -20, 1, -20)
+		Page.Position = UDim2.new(0, 10, 0, 10)
+		Page.BackgroundTransparency = 1
+		Page.BorderSizePixel = 0
+		Page.ScrollBarThickness = 4
+		Page.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 255)
+		Page.Visible = (i == 1)
+		Page.CanvasSize = UDim2.new(0, 0, 0, 600)
+		Page.Parent = ContentFrame
+
+		local UIListLayout = Instance.new("UIListLayout")
+		UIListLayout.Padding = UDim.new(0, 8)
+		UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		UIListLayout.Parent = Page
+
+		Tabs[tabName] = {Btn = TabBtn, Page = Page}
+	end
+
+	-- Tab Switching Logic
+	for tabName, tabData in pairs(Tabs) do
+		if typeof(tabData) == "table" then
+			tabData.Btn.MouseButton1Click:Connect(function()
+				for otherName, otherData in pairs(Tabs) do
+					if typeof(otherData) == "table" then
+						otherData.Page.Visible = (otherName == tabName)
+						otherData.Btn.BackgroundColor3 = (otherName == tabName) and Color3.fromRGB(0, 255, 255, 0.3) or Color3.fromRGB(60, 60, 70)
+					end
+				end
+			end)
+		end
+	end
+
+	-- ═══════════════════════════
+	-- ESP PAGE BUILDER
+	-- ═══════════════════════════
+	local function createToggle(parent, name, settingKey)
+		local Frame = Instance.new("Frame")
+		Frame.Name = "Toggle_" .. name
+		Frame.Size = UDim2.new(1, -10, 0, 35)
+		Frame.BackgroundTransparency = 1
+		Frame.Parent = parent
+
+		local Label = Instance.new("TextLabel")
+		Label.Size = UDim2.new(0, 120, 1, 0)
+		Label.BackgroundTransparency = 1
+		Label.Text = Lang[name] and Lang[name][Settings.LANG] or name
+		Label.TextColor3 = Color3.fromRGB(200, 200, 200)
+		Label.TextSize = 13
+		Label.Font = Enum.Font.Gotham
+		Label.TextXAlignment = Enum.TextXAlignment.Left
+		Label.Parent = Frame
+
+		local Btn = Instance.new("TextButton")
+		Btn.Name = "Switch"
+		Btn.Size = UDim2.new(0, 44, 0, 22)
+		Btn.Position = UDim2.new(1, -50, 0.5, -11)
+		Btn.BackgroundColor3 = Settings[settingKey] and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(80, 80, 90)
+		Btn.Text = Settings[settingKey] and "ON" or "OFF"
+		Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		Btn.TextSize = 11
+		Btn.Font = Enum.Font.GothamBold
+		Btn.BorderSizePixel = 0
+		Btn.AutoButtonColor = false
+		Btn.Parent = Frame
+
+		local BtnCorner = Instance.new("UICorner")
+		BtnCorner.CornerRadius = UDim.new(0, 4)
+		BtnCorner.Parent = Btn
+
+		local BtnStroke = Instance.new("UIStroke")
+		BtnStroke.Color = Color3.fromRGB(0, 255, 255)
+		BtnStroke.Thickness = 1
+		BtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		BtnStroke.Parent = Btn
+
+		Btn.MouseButton1Click:Connect(function()
+			Settings[settingKey] = not Settings[settingKey]
+			Btn.BackgroundColor3 = Settings[settingKey] and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(80, 80, 90)
+			Btn.Text = Settings[settingKey] and "ON" or "OFF"
+			dbg(settingKey .. " = " .. tostring(Settings[settingKey]))
+			refreshAllESP()
+		end)
+
+		return Frame
+	end
+
+	-- Populate ESP Page
+	local espPage = Tabs["ESP"].Page
+	createToggle(espPage, "Highlight", "ESP_HL")
+	createToggle(espPage, "Name", "ESP_NM")
+	createToggle(espPage, "Distance", "ESP_DST")
+	createToggle(espPage, "Health", "ESP_HP")
+	createToggle(espPage, "TeamFilter", "ESP_TM")
+	createToggle(espPage, "Rainbow", "ESP_RBW")
+	createToggle(espPage, "Fill", "ESP_FIL")
+
+	-- Color Picker Button
+	local CPBtn = Instance.new("TextButton")
+	CPBtn.Name = "ColorPickerBtn"
+	CPBtn.Size = UDim2.new(1, -10, 0, 35)
+	CPBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+	CPBtn.Text = Lang["ColorPicker"][Settings.LANG]
+	CPBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	CPBtn.TextSize = 13
+	CPBtn.Font = Enum.Font.GothamSemibold
+	CPBtn.BorderSizePixel = 0
+	CPBtn.Parent = espPage
+
+	local CPBtnCorner = Instance.new("UICorner")
+	CPBtnCorner.CornerRadius = UDim.new(0, 4)
+	CPBtnCorner.Parent = CPBtn
+
+	local CPBtnStroke = Instance.new("UIStroke")
+	CPBtnStroke.Color = Color3.fromRGB(0, 255, 255)
+	CPBtnStroke.Thickness = 1
+	CPBtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	CPBtnStroke.Parent = CPBtn
+
+	-- Color Picker Float
+	local CPFloat = Instance.new("Frame")
+	CPFloat.Name = "CPFloat"
+	CPFloat.Size = UDim2.new(0, 160, 0, 160)
+	CPFloat.Position = UDim2.new(0, 0, 1, 5)
+	CPFloat.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+	CPFloat.BorderSizePixel = 0
+	CPFloat.Visible = false
+	CPFloat.Parent = CPBtn
+
+	local CPFloatCorner = Instance.new("UICorner")
+	CPFloatCorner.CornerRadius = UDim.new(0, 6)
+	CPFloatCorner.Parent = CPFloat
+
+	local CPFloatStroke = Instance.new("UIStroke")
+	CPFloatStroke.Color = Color3.fromRGB(0, 255, 255)
+	CPFloatStroke.Thickness = 2
+	CPFloatStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	CPFloatStroke.Parent = CPFloat
+
+	local CPGrid = Instance.new("UIGridLayout")
+	CPGrid.CellSize = UDim2.new(0, 30, 0, 30)
+	CPGrid.CellPadding = UDim2.new(0, 6, 0, 6)
+	CPGrid.FillDirection = Enum.FillDirection.Horizontal
+	CPGrid.SortOrder = Enum.SortOrder.LayoutOrder
+	CPGrid.Parent = CPFloat
+
+	for _, color in ipairs(ColorList) do
+		local ColorBtn = Instance.new("TextButton")
+		ColorBtn.Size = UDim2.new(0, 30, 0, 30)
+		ColorBtn.BackgroundColor3 = color
+		ColorBtn.Text = ""
+		ColorBtn.BorderSizePixel = 0
+		ColorBtn.Parent = CPFloat
+
+		local ColorBtnCorner = Instance.new("UICorner")
+		ColorBtnCorner.CornerRadius = UDim.new(0, 4)
+		ColorBtnCorner.Parent = ColorBtn
+
+		ColorBtn.MouseButton1Click:Connect(function()
+			Settings.ESP_CLR_VAL = color
+			Settings.ESP_CLR = true
+			Settings.ESP_RBW = false
+			CPBtn.BackgroundColor3 = color
+			CPFloat.Visible = false
+			dbg("Color selected: " .. tostring(color))
+			refreshAllESP()
+		end)
+	end
+
+	CPBtn.MouseButton1Click:Connect(function()
+		CPFloat.Visible = not CPFloat.Visible
+	end)
+
+	-- ═══════════════════════════
+	-- CFG PAGE
+	-- ═══════════════════════════
+	local cfgPage = Tabs["CFG"].Page
+	local langLabel = Instance.new("TextLabel")
+	langLabel.Size = UDim2.new(1, 0, 0, 25)
+	langLabel.BackgroundTransparency = 1
+	langLabel.Text = Lang["Language"][Settings.LANG]
+	langLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+	langLabel.TextSize = 13
+	langLabel.Font = Enum.Font.GothamSemibold
+	langLabel.Parent = cfgPage
+
+	local langButtons = {"EN", "PT", "RU", "FR", "ABBR"}
+	for i, code in ipairs(langButtons) do
+		local LangBtn = Instance.new("TextButton")
+		LangBtn.Size = UDim2.new(1, -10, 0, 30)
+		LangBtn.BackgroundColor3 = (Settings.LANG == code) and Color3.fromRGB(0, 255, 255, 0.3) or Color3.fromRGB(40, 40, 50)
+		LangBtn.Text = code
+		LangBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		LangBtn.TextSize = 13
+		LangBtn.Font = Enum.Font.Gotham
+		LangBtn.BorderSizePixel = 0
+		LangBtn.Parent = cfgPage
+
+		local LangBtnCorner = Instance.new("UICorner")
+		LangBtnCorner.CornerRadius = UDim.new(0, 4)
+		LangBtnCorner.Parent = LangBtn
+
+		LangBtn.MouseButton1Click:Connect(function()
+			Settings.LANG = code
+			langLabel.Text = Lang["Language"][Settings.LANG]
+			for _, btn in ipairs(cfgPage:GetChildren()) do
+				if btn:IsA("TextButton") then
+					btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+				end
+			end
+			LangBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 255, 0.3)
+		end)
+	end
+
+	-- ═══════════════════════════
+	-- DRAG SYSTEM
+	-- ═══════════════════════════
+	local dragging = false
+	local dragInput, dragStart, startPos
+
+	TopBar.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStart = input.Position
+			startPos = MainFrame.Position
+			dbg("Drag started")
+		end
+	end)
+
+	TopBar.InputChanged:Connect(function(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			local delta = input.Position - dragStart
+			local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+			MainFrame.Position = newPos
+		end
+	end)
+
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = false
+		end
+	end)
+
+	-- ═══════════════════════════
+	-- TOGGLE UI
+	-- ═══════════════════════════
+	local function toggleUI()
+		Settings.UI_OPEN = not Settings.UI_OPEN
+		local goalSize = Settings.UI_OPEN and UDim2.new(0, 580, 0, 420) or UDim2.new(0, 580, 0, 0)
+		local tween = TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = goalSize})
+		tween:Play()
+		dbg("UI " .. (Settings.UI_OPEN and "opened" or "closed"))
+	end
+
+	BtnToggle.MouseButton1Click:Connect(toggleUI)
+
+	return ScreenGui, MainFrame
 end
 
-local function CreateInstance(class, props)
-    local inst = Instance.new(class)
-    for k, v in pairs(props) do
-        if k == "Children" then
-            for _, child in ipairs(v) do
-                child.Parent = inst
-            end
-        else
-            inst[k] = v
-        end
-    end
-    return inst
+-- ══════════════════════════════════════════════
+-- 🧠 ESP CORE
+-- ══════════════════════════════════════════════
+local function getColor(plr)
+	local hum = plr.Character and plr.Character:FindFirstChild("Humanoid")
+	local hp = hum and hum.Health or 100
+
+	-- Priority 1: Rainbow
+	if Settings.ESP_RBW then
+		return Color3.fromHSV((tick() % 5) / 5, 1, 1)
+	end
+
+	-- Priority 2: Team Filter
+	if Settings.ESP_TM and plr.Team then
+		return plr.TeamColor.Color
+	end
+
+	-- Priority 3: Custom Color
+	if Settings.ESP_CLR then
+		return Settings.ESP_CLR_VAL
+	end
+
+	-- Priority 4: HP Logic (Fill only handled separately)
+	return Color3.fromRGB(255, 255, 255)
 end
 
-local function UpdateLangTexts()
-    for _, tab in pairs(Tabs) do
-        if tab.UpdateTexts then tab:UpdateTexts() end
-    end
-end
+local function getFillColor(plr)
+	local hum = plr.Character and plr.Character:FindFirstChild("Humanoid")
+	local hp = hum and hum.Health or 100
 
--- Color Picker
-local ColorPickerOpen = false
-local ColorPickerFrame
-local ColorOptions = {
-    Color3.fromRGB(255, 0, 0),
-    Color3.fromRGB(0, 255, 0),
-    Color3.fromRGB(0, 0, 255),
-    Color3.fromRGB(255, 255, 0),
-    Color3.fromRGB(255, 0, 255),
-    Color3.fromRGB(0, 255, 255),
-    Color3.fromRGB(255, 255, 255),
-    Color3.fromRGB(0, 0, 0),
-    Color3.fromRGB(255, 165, 0),
-    Color3.fromRGB(128, 0, 128)
-}
+	if Settings.ESP_TM then
+		return plr.TeamColor.Color
+	end
 
--- GUI Construction
-local ScreenGui = CreateInstance("ScreenGui", {
-    Name = "MigueleMaxwellEspPro",
-    Parent = CoreGui,
-    ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-})
-
-local MainFrame = CreateInstance("Frame", {
-    Name = "MainFrame",
-    Parent = ScreenGui,
-    BackgroundColor3 = Color3.fromRGB(25, 25, 35),
-    Position = UDim2.new(0.5, -300, 0.5, -200),
-    Size = UDim2.new(0, 600, 0, 400),
-    BorderSizePixel = 0,
-    AnchorPoint = Vector2.new(0.5, 0.5),
-    Active = true,
-    Draggable = true
-})
-
-CreateInstance("UICorner", { Parent = MainFrame, CornerRadius = UDim.new(0, 8) })
-CreateInstance("UIStroke", {
-    Parent = MainFrame,
-    Thickness = 1.5,
-    Color = Color3.fromRGB(0, 255, 255),
-    Transparency = 0.3
-})
-CreateInstance("UIGradient", {
-    Parent = MainFrame,
-    Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 200)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 255))
-    }),
-    Rotation = 45,
-    Transparency = NumberSequence.new(0.7)
-})
-
--- Sidebar
-local Sidebar = CreateInstance("Frame", {
-    Name = "Sidebar",
-    Parent = MainFrame,
-    BackgroundColor3 = Color3.fromRGB(20, 20, 30),
-    Size = UDim2.new(0, 120, 1, 0),
-    Position = UDim2.new(0, 0, 0, 0),
-    BorderSizePixel = 0
-})
-
-CreateInstance("UICorner", { Parent = Sidebar, CornerRadius = UDim.new(0, 8) })
-CreateInstance("UIStroke", {
-    Parent = Sidebar,
-    Thickness = 1,
-    Color = Color3.fromRGB(0, 255, 255),
-    Transparency = 0.5
-})
-
--- Content
-local ContentFrame = CreateInstance("Frame", {
-    Name = "Content",
-    Parent = MainFrame,
-    BackgroundColor3 = Color3.fromRGB(30, 30, 40),
-    Size = UDim2.new(1, -120, 1, 0),
-    Position = UDim2.new(0, 120, 0, 0),
-    BorderSizePixel = 0
-})
-
-CreateInstance("UICorner", { Parent = ContentFrame, CornerRadius = UDim.new(0, 8) })
-
--- Tabs
-local ESPContent = CreateInstance("ScrollingFrame", {
-    Name = "ESPContent",
-    Parent = ContentFrame,
-    BackgroundTransparency = 1,
-    Size = UDim2.new(1, -10, 1, -10),
-    Position = UDim2.new(0, 5, 0, 5),
-    ScrollBarThickness = 4,
-    Visible = true,
-    CanvasSize = UDim2.new(0, 0, 0, 0)
-})
-
-local CFGContent = CreateInstance("ScrollingFrame", {
-    Name = "CFGContent",
-    Parent = ContentFrame,
-    BackgroundTransparency = 1,
-    Size = UDim2.new(1, -10, 1, -10),
-    Position = UDim2.new(0, 5, 0, 5),
-    ScrollBarThickness = 4,
-    Visible = false,
-    CanvasSize = UDim2.new(0, 0, 0, 0)
-})
-
--- Toggle Function
-local function CreateToggle(parent, text, default, callback)
-    local toggled = default
-    local btn = CreateInstance("TextButton", {
-        Parent = parent,
-        Size = UDim2.new(1, -10, 0, 28),
-        Position = UDim2.new(0, 5, 0, 0),
-        BackgroundColor3 = toggled and Color3.fromRGB(0, 255, 255) or Color3.fromRGB(50, 50, 60),
-        Text = text,
-        TextColor3 = Color3.fromRGB(255, 255, 255),
-        TextSize = 12,
-        Font = Enum.Font.GothamBold,
-        BorderSizePixel = 0
-    })
-    CreateInstance("UICorner", { Parent = btn, CornerRadius = UDim.new(0, 6) })
-    CreateInstance("UIStroke", {
-        Parent = btn,
-        Thickness = 1,
-        Color = Color3.fromRGB(0, 255, 255),
-        Transparency = 0.5
-    })
-
-    btn.MouseButton1Click:Connect(function()
-        toggled = not toggled
-        btn.BackgroundColor3 = toggled and Color3.fromRGB(0, 255, 255) or Color3.fromRGB(50, 50, 60)
-        callback(toggled)
-    end)
-
-    return {
-        Button = btn,
-        SetState = function(state)
-            toggled = state
-            btn.BackgroundColor3 = toggled and Color3.fromRGB(0, 255, 255) or Color3.fromRGB(50, 50, 60)
-        end
-    }
-end
-
--- Color Picker Button
-local function CreateColorPicker(parent)
-    local frame = CreateInstance("Frame", {
-        Name = "ColorPickerDropdown",
-        Parent = parent,
-        Size = UDim2.new(1, -10, 0, 0),
-        Position = UDim2.new(0, 5, 0, 0),
-        BackgroundTransparency = 1,
-        ClipsDescendants = true
-    })
-
-    local dropdown = CreateInstance("Frame", {
-        Parent = frame,
-        Size = UDim2.new(1, 0, 0, 0),
-        BackgroundTransparency = 1
-    })
-
-    local colorList = CreateInstance("UIListLayout", {
-        Parent = dropdown,
-        FillDirection = Enum.FillDirection.Horizontal,
-        Padding = UDim.new(0, 4),
-        Wraps = true
-    })
-
-    for _, color in ipairs(ColorOptions) do
-        local colorBtn = CreateInstance("TextButton", {
-            Parent = dropdown,
-            Size = UDim2.new(0, 30, 0, 30),
-            BackgroundColor3 = color,
-            Text = "",
-            BorderSizePixel = 0
-        })
-        CreateInstance("UICorner", { Parent = colorBtn, CornerRadius = UDim.new(0, 6) })
-        CreateInstance("UIStroke", {
-            Parent = colorBtn,
-            Thickness = 1,
-            Color = Color3.fromRGB(255, 255, 255),
-            Transparency = 0.3
-        })
-
-        colorBtn.MouseButton1Click:Connect(function()
-            Settings.CLR = color
-            ColorPickerOpen = false
-            frame:TweenSize(UDim2.new(1, -10, 0, 0), "Out", "Quad", 0.3)
-        end)
-    end
-
-    return frame
-end
-
--- Build ESP Tab
-local function BuildESP()
-    local yOffset = 10
-    local toggles = {}
-
-    local masterToggle = CreateToggle(ESPContent, GetText("MASTER"), Settings.ESP, function(state)
-        Settings.ESP = state
-        for _, t in pairs(toggles) do
-            if t ~= masterToggle then
-                t.SetState(state)
-            end
-        end
-    end)
-    masterToggle.Button.Position = UDim2.new(0, 5, 0, yOffset)
-    yOffset += 32
-
-    local toggleNames = {"HL", "NM", "DST", "HP", "TMF", "RBW", "FILL"}
-    for _, name in ipairs(toggleNames) do
-        local toggle = CreateToggle(ESPContent, GetText(name), Settings[name], function(state)
-            Settings[name] = state
-        end)
-        toggle.Button.Position = UDim2.new(0, 5, 0, yOffset)
-        toggles[name] = toggle
-        yOffset += 32
-    end
-
-    local clrBtn = CreateInstance("TextButton", {
-        Parent = ESPContent,
-        Size = UDim2.new(1, -10, 0, 28),
-        Position = UDim2.new(0, 5, 0, yOffset),
-        BackgroundColor3 = Color3.fromRGB(50, 50, 60),
-        Text = GetText("COLOR_PICKER"),
-        TextColor3 = Color3.fromRGB(255, 255, 255),
-        TextSize = 12,
-        Font = Enum.Font.GothamBold,
-        BorderSizePixel = 0
-    })
-    CreateInstance("UICorner", { Parent = clrBtn, CornerRadius = UDim.new(0, 6) })
-    CreateInstance("UIStroke", {
-        Parent = clrBtn,
-        Thickness = 1,
-        Color = Color3.fromRGB(0, 255, 255),
-        Transparency = 0.5
-    })
-    yOffset += 32
-
-    ColorPickerFrame = CreateColorPicker(ESPContent)
-    ColorPickerFrame.Position = UDim2.new(0, 5, 0, yOffset)
-
-    clrBtn.MouseButton1Click:Connect(function()
-        ColorPickerOpen = not ColorPickerOpen
-        if ColorPickerOpen then
-            ColorPickerFrame:TweenSize(UDim2.new(1, -10, 0, 120), "Out", "Quad", 0.3)
-        else
-            ColorPickerFrame:TweenSize(UDim2.new(1, -10, 0, 0), "Out", "Quad", 0.3)
-        end
-    end)
-
-    ESPContent.CanvasSize = UDim2.new(0, 0, 0, yOffset + 10)
-end
-
--- Build CFG Tab
-local function BuildCFG()
-    local langLabel = CreateInstance("TextLabel", {
-        Parent = CFGContent,
-        Size = UDim2.new(1, -10, 0, 24),
-        Position = UDim2.new(0, 5, 0, 10),
-        BackgroundTransparency = 1,
-        Text = GetText("LANGUAGE"),
-        TextColor3 = Color3.fromRGB(255, 255, 255),
-        TextSize = 14,
-        Font = Enum.Font.GothamBold,
-        TextXAlignment = Enum.TextXAlignment.Left
-    })
-
-    local langDropdown = CreateInstance("TextButton", {
-        Parent = CFGContent,
-        Size = UDim2.new(1, -10, 0, 28),
-        Position = UDim2.new(0, 5, 0, 38),
-        BackgroundColor3 = Color3.fromRGB(50, 50, 60),
-        Text = "EN",
-        TextColor3 = Color3.fromRGB(255, 255, 255),
-        TextSize = 12,
-        Font = Enum.Font.GothamBold,
-        BorderSizePixel = 0
-    })
-    CreateInstance("UICorner", { Parent = langDropdown, CornerRadius = UDim.new(0, 6) })
-    CreateInstance("UIStroke", {
-        Parent = langDropdown,
-        Thickness = 1,
-        Color = Color3.fromRGB(0, 255, 255),
-        Transparency = 0.5
-    })
-
-    local langList = {"EN", "PT", "RU", "FR", "ABR"}
-    local langIndex = 1
-
-    langDropdown.MouseButton1Click:Connect(function()
-        langIndex = langIndex % #langList + 1
-        CurrentLang = langList[langIndex]
-        langDropdown.Text = CurrentLang
-        UpdateLangTexts()
-    end)
-
-    Tabs["CFG"] = {
-        UpdateTexts = function()
-            langLabel.Text = GetText("LANGUAGE")
-        end
-    }
-end
-
--- Tab Switching
-local ESPTab = CreateInstance("TextButton", {
-    Parent = Sidebar,
-    Size = UDim2.new(1, -10, 0, 32),
-    Position = UDim2.new(0, 5, 0, 10),
-    BackgroundColor3 = Color3.fromRGB(0, 255, 255),
-    Text = "ESP",
-    TextColor3 = Color3.fromRGB(255, 255, 255),
-    TextSize = 14,
-    Font = Enum.Font.GothamBold,
-    BorderSizePixel = 0
-})
-CreateInstance("UICorner", { Parent = ESPTab, CornerRadius = UDim.new(0, 6) })
-CreateInstance("UIStroke", {
-    Parent = ESPTab,
-    Thickness = 1,
-    Color = Color3.fromRGB(0, 255, 255),
-    Transparency = 0.3
-})
-
-local CFGTab = CreateInstance("TextButton", {
-    Parent = Sidebar,
-    Size = UDim2.new(1, -10, 0, 32),
-    Position = UDim2.new(0, 5, 0, 48),
-    BackgroundColor3 = Color3.fromRGB(50, 50, 60),
-    Text = "CFG",
-    TextColor3 = Color3.fromRGB(255, 255, 255),
-    TextSize = 14,
-    Font = Enum.Font.GothamBold,
-    BorderSizePixel = 0
-})
-CreateInstance("UICorner", { Parent = CFGTab, CornerRadius = UDim.new(0, 6) })
-CreateInstance("UIStroke", {
-    Parent = CFGTab,
-    Thickness = 1,
-    Color = Color3.fromRGB(0, 255, 255),
-    Transparency = 0.5
-})
-
-ESPTab.MouseButton1Click:Connect(function()
-    ESPContent.Visible = true
-    CFGContent.Visible = false
-    ESPTab.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
-    CFGTab.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
-end)
-
-CFGTab.MouseButton1Click:Connect(function()
-    ESPContent.Visible = false
-    CFGContent.Visible = true
-    CFGTab.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
-    ESPTab.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
-end)
-
--- Close/Open Toggle
-local ToggleBtn = CreateInstance("TextButton", {
-    Parent = ScreenGui,
-    Size = UDim2.new(0, 40, 0, 40),
-    Position = UDim2.new(0.5, 300, 0.5, -220),
-    AnchorPoint = Vector2.new(0.5, 0.5),
-    BackgroundColor3 = Color3.fromRGB(20, 20, 30),
-    Text = "×",
-    TextColor3 = Color3.fromRGB(0, 255, 255),
-    TextSize = 24,
-    Font = Enum.Font.GothamBold,
-    BorderSizePixel = 0
-})
-CreateInstance("UICorner", { Parent = ToggleBtn, CornerRadius = UDim.new(0, 8) })
-CreateInstance("UIStroke", {
-    Parent = ToggleBtn,
-    Thickness = 1.5,
-    Color = Color3.fromRGB(0, 255, 255),
-    Transparency = 0.3
-})
-
-local MainVisible = true
-ToggleBtn.MouseButton1Click:Connect(function()
-    MainVisible = not MainVisible
-    if MainVisible then
-        MainFrame:TweenSize(UDim2.new(0, 600, 0, 400), "Out", "Quad", 0.3)
-        MainFrame.Visible = true
-    else
-        MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quad", 0.3)
-        task.wait(0.3)
-        MainFrame.Visible = false
-    end
-end)
-
--- Drag Handling
-local dragging = false
-local dragInput, dragStart, startPos
-
-MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = MainFrame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-MainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
--- ESP System
-local function getHPColor(hp, maxhp)
-    local ratio = hp / maxhp
-    if ratio <= 0 then return Color3.fromRGB(0, 0, 0)
-    elseif ratio < 0.3 then return Color3.fromRGB(255, 0, 0)
-    elseif ratio < 0.7 then return Color3.fromRGB(255, 255, 0)
-    else return Color3.fromRGB(0, 255, 0) end
-end
-
-local function getRainbowColor(time)
-    local hue = (time % 5) / 5
-    return Color3.fromHSV(hue, 1, 1)
-end
-
-local function getESPColor(plr)
-    if Settings.TMF and plr.Team and LP.Team then
-        return plr.TeamColor.Color
-    elseif Settings.RBW then
-        return getRainbowColor(os.clock())
-    else
-        return Settings.CLR
-    end
+	if hp > 70 then
+		return Color3.fromRGB(0, 255, 0) -- Green
+	elseif hp > 30 then
+		return Color3.fromRGB(255, 255, 0) -- Yellow
+	elseif hp > 0 then
+		return Color3.fromRGB(255, 0, 0) -- Red
+	else
+		return Color3.fromRGB(0, 0, 0) -- Black
+	end
 end
 
 local function createESP(plr)
-    if plr == LP then return end
-    if ESP_Cache[plr] then return end
+	if plr == LocalPlayer then return end
+	if espObjects[plr] then return end -- No duplicate
 
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "ESP_Highlight"
-    highlight.Adornee = plr.Character
-    highlight.FillTransparency = Settings.FILL and 0.5 or 1
-    highlight.OutlineTransparency = 0
-    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    highlight.Parent = plr.Character
+	local char = plr.Character
+	if not char then
+		dbg("No character for " .. plr.Name)
+		return
+	end
 
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "ESP_Billboard"
-    billboard.AlwaysOnTop = true
-    billboard.Size = UDim2.new(0, 200, 0, 60)
-    billboard.StudsOffset = Vector3.new(0, 3, 0)
-    billboard.Parent = plr.Character
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	local hum = char:FindFirstChild("Humanoid")
+	if not hrp or not hum then
+		dbg("No HRP/Humanoid for " .. plr.Name)
+		return
+	end
 
-    local nameLabel = Instance.new("TextLabel")
-    nameLabel.Size = UDim2.new(1, 0, 0, 18)
-    nameLabel.BackgroundTransparency = 1
-    nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    nameLabel.TextStrokeTransparency = 0
-    nameLabel.TextSize = 12
-    nameLabel.Font = Enum.Font.GothamBold
-    nameLabel.Parent = billboard
+	dbg("Creating ESP for " .. plr.Name)
 
-    local distLabel = Instance.new("TextLabel")
-    distLabel.Size = UDim2.new(1, 0, 0, 18)
-    distLabel.Position = UDim2.new(0, 0, 0, 18)
-    distLabel.BackgroundTransparency = 1
-    distLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-    distLabel.TextStrokeTransparency = 0
-    distLabel.TextSize = 11
-    distLabel.Font = Enum.Font.Gotham
-    distLabel.Parent = billboard
+	-- Highlight
+	local hl = Instance.new("Highlight")
+	hl.Adornee = char
+	hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+	hl.FillColor = getFillColor(plr)
+	hl.OutlineColor = getColor(plr)
+	hl.FillTransparency = Settings.ESP_FIL and 0.5 or 1
+	hl.OutlineTransparency = 0
+	hl.Enabled = Settings.ESP_HL
+	hl.Parent = char
 
-    local hpLabel = Instance.new("TextLabel")
-    hpLabel.Size = UDim2.new(1, 0, 0, 18)
-    hpLabel.Position = UDim2.new(0, 0, 0, 34)
-    hpLabel.BackgroundTransparency = 1
-    hpLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    hpLabel.TextStrokeTransparency = 0
-    hpLabel.TextSize = 11
-    hpLabel.Font = Enum.Font.Gotham
-    hpLabel.Parent = billboard
+	-- Billboard Gui
+	local bg = Instance.new("BillboardGui")
+	bg.Name = "ESP_Billboard"
+	bg.AlwaysOnTop = true
+	bg.Size = UDim2.new(0, 200, 0, 50)
+	bg.StudsOffset = Vector3.new(0, 3, 0)
+	bg.MaxDistance = 500
+	bg.Parent = hrp
 
-    ESP_Cache[plr] = {
-        Highlight = highlight,
-        Billboard = billboard,
-        NameLabel = nameLabel,
-        DistLabel = distLabel,
-        HPLabel = hpLabel
-    }
+	local txtLabel = Instance.new("TextLabel")
+	txtLabel.Name = "ESP_Label"
+	txtLabel.Size = UDim2.new(1, 0, 1, 0)
+	txtLabel.BackgroundTransparency = 1
+	txtLabel.TextColor3 = Settings.ESP_RBW and Color3.fromHSV((tick() % 5) / 5, 1, 1) or Color3.fromRGB(255, 255, 255)
+	txtLabel.TextStrokeTransparency = 0.5
+	txtLabel.TextSize = 12
+	txtLabel.Font = Enum.Font.GothamSemibold
+	txtLabel.Parent = bg
 
-    local function onCharacterAdded(char)
-        highlight.Adornee = char
-        billboard.Parent = char
-        local humanoid = char:WaitForChild("Humanoid")
-        local rootPart = char:WaitForChild("HumanoidRootPart")
+	espObjects[plr] = {hl = hl, bg = bg, plr = plr}
 
-        local updateConnection
-        updateConnection = RunService.Heartbeat:Connect(function()
-            if not char or not char.Parent then
-                updateConnection:Disconnect()
-                return
-            end
+	-- Ancestry listener for cleanup
+	local ancConn = char.AncestryChanged:Connect(function(_, parent)
+		if not parent then
+			dbg("Character removed for " .. plr.Name)
+			removeESP(plr)
+		end
+	end)
 
-            if not Settings.ESP or not Settings.HL then
-                highlight.Enabled = false
-            else
-                highlight.Enabled = true
-                local color = getESPColor(plr)
-                highlight.OutlineColor = color
-                if Settings.FILL then
-                    highlight.FillColor = Settings.TMF and plr.TeamColor.Color or (Settings.RBW and getRainbowColor(os.clock()) or Settings.CLR)
-                    highlight.FillTransparency = 0.5
-                    if Settings.HP and Settings.TMF == false and humanoid.Health > 0 then
-                        highlight.FillColor = getHPColor(humanoid.Health, humanoid.MaxHealth)
-                    end
-                else
-                    highlight.FillTransparency = 1
-                end
-            end
-
-            if not Settings.ESP or not Settings.NM then
-                nameLabel.Visible = false
-            else
-                nameLabel.Visible = true
-                nameLabel.Text = plr.Name
-            end
-
-            if not Settings.ESP or not Settings.DST then
-                distLabel.Visible = false
-            else
-                distLabel.Visible = true
-                if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") and rootPart then
-                    local dist = (LP.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
-                    distLabel.Text = math.floor(dist) .. " Studs"
-                end
-            end
-
-            if not Settings.ESP or not Settings.HP then
-                hpLabel.Visible = false
-            else
-                hpLabel.Visible = true
-                hpLabel.Text = "HP: " .. math.floor(humanoid.Health)
-            end
-        end)
-    end
-
-    if plr.Character then
-        onCharacterAdded(plr.Character)
-    end
-
-    plr.CharacterAdded:Connect(onCharacterAdded)
+	if not activeConnections[plr] then
+		activeConnections[plr] = {}
+	end
+	table.insert(activeConnections[plr], ancConn)
 end
 
 local function removeESP(plr)
-    if ESP_Cache[plr] then
-        local cache = ESP_Cache[plr]
-        if cache.Highlight then cache.Highlight:Destroy() end
-        if cache.Billboard then cache.Billboard:Destroy() end
-        ESP_Cache[plr] = nil
-    end
+	local data = espObjects[plr]
+	if not data then return end
+
+	dbg("Removing ESP for " .. plr.Name)
+
+	if data.hl then
+		data.hl:Destroy()
+	end
+	if data.bg then
+		data.bg:Destroy()
+	end
+
+	-- Clean connections
+	if activeConnections[plr] then
+		for _, conn in ipairs(activeConnections[plr]) do
+			conn:Disconnect()
+		end
+		activeConnections[plr] = nil
+	end
+
+	espObjects[plr] = nil
 end
 
--- Player detection
+local function updateESP(plr)
+	local data = espObjects[plr]
+	if not data then return end
+
+	local hl = data.hl
+	local bg = data.bg
+
+	if hl and hl.Parent then
+		hl.Enabled = Settings.ESP_HL
+		hl.FillColor = getFillColor(plr)
+		hl.OutlineColor = getColor(plr)
+		hl.FillTransparency = Settings.ESP_FIL and 0.5 or 1
+		hl.OutlineTransparency = 0
+	end
+
+	if bg and bg.Parent then
+		local char = plr.Character
+		local hum = char and char:FindFirstChild("Humanoid")
+		local txtLabel = bg:FindFirstChild("ESP_Label")
+		if txtLabel then
+			local textParts = {}
+			if Settings.ESP_NM then
+				table.insert(textParts, plr.Name)
+			end
+			if Settings.ESP_DST then
+				local localChar = LocalPlayer.Character
+				local localHRP = localChar and localChar:FindFirstChild("HumanoidRootPart")
+				local targetHRP = char and char:FindFirstChild("HumanoidRootPart")
+				if localHRP and targetHRP then
+					local dist = math.floor((localHRP.Position - targetHRP.Position).Magnitude)
+					table.insert(textParts, dist .. " studs")
+				end
+			end
+			if Settings.ESP_HP and hum then
+				table.insert(textParts, "HP: " .. math.floor(hum.Health))
+			end
+			txtLabel.Text = table.concat(textParts, "\n")
+		end
+	end
+end
+
+function refreshAllESP()
+	for plr, _ in pairs(espObjects) do
+		updateESP(plr)
+	end
+end
+
+-- ══════════════════════════════════════════════
+-- 🔄 UPDATE LOOP
+-- ══════════════════════════════════════════════
+task.spawn(function()
+	while true do
+		task.wait(0.1)
+		for plr, _ in pairs(espObjects) do
+			updateESP(plr)
+		end
+	end
+end)
+
+-- ══════════════════════════════════════════════
+-- 🎯 PLAYER LISTENERS
+-- ══════════════════════════════════════════════
+-- Auto attach existing players
 for _, plr in ipairs(Players:GetPlayers()) do
-    if plr ~= LP then
-        createESP(plr)
-    end
+	if plr ~= LocalPlayer then
+		createESP(plr)
+	end
 end
 
+-- PlayerAdded
 Players.PlayerAdded:Connect(function(plr)
-    if plr ~= LP then
-        createESP(plr)
-    end
+	dbg("Player detected: " .. plr.Name)
+	local charConn
+	charConn = plr.CharacterAdded:Connect(function(char)
+		dbg("Character loaded: " .. plr.Name)
+		removeESP(plr)
+		task.wait(0.1)
+		createESP(plr)
+	end)
+	table.insert(activeConnections, charConn)
 end)
 
+-- CharacterAdded for existing players
+for _, plr in ipairs(Players:GetPlayers()) do
+	if plr ~= LocalPlayer then
+		local charConn = plr.CharacterAdded:Connect(function(char)
+			dbg("Character loaded: " .. plr.Name)
+			removeESP(plr)
+			task.wait(0.1)
+			createESP(plr)
+		end)
+		if not activeConnections[plr] then
+			activeConnections[plr] = {}
+		end
+		table.insert(activeConnections[plr], charConn)
+	end
+end
+
+-- PlayerRemoving
 Players.PlayerRemoving:Connect(function(plr)
-    removeESP(plr)
+	dbg("Player left: " .. plr.Name)
+	removeESP(plr)
 end)
 
--- Build UI
-BuildESP()
-BuildCFG()
-Tabs["ESP"] = {
-    UpdateTexts = function()
-        ESPTab.Text = GetText("ESP")
-    end
-}
-Tabs["CFG"].UpdateTexts = Tabs["CFG"].UpdateTexts
+-- ══════════════════════════════════════════════
+-- 🚀 INIT
+-- ══════════════════════════════════════════════
+dbg("MigueleMaxwell Esp Pro initialized")
+local screenGui, mainFrame = createUI()
+dbg("UI created successfully")
 
--- Initial Rainbow Loop
-spawn(function()
-    while true do
-        if Settings.ESP and Settings.RBW then
-            for plr, cache in pairs(ESP_Cache) do
-                if cache.Highlight and cache.Highlight.Enabled then
-                    local color = getRainbowColor(os.clock())
-                    cache.Highlight.OutlineColor = color
-                    if Settings.FILL then
-                        cache.Highlight.FillColor = color
-                    end
-                end
-            end
-        end
-        task.wait(0.05)
-    end
-end)
+-- Initial ESP refresh
+refreshAllESP()
